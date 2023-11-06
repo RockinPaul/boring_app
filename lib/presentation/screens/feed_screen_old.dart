@@ -48,7 +48,6 @@ class FeedScreen extends StatelessWidget {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                // Build your feed items here.
                 return BlocConsumer<ActivityCubit, ActivityState>(
                   listener: (context, state) {
                     debugPrint('State in listener: $state');
@@ -68,13 +67,7 @@ class FeedScreen extends StatelessWidget {
                         // When the user reaches the end of the list, fetch the next page.
                         BlocProvider.of<ActivityCubit>(context).fetchMore();
                       }
-                      return FeedItem(
-                        title: activity.name!,
-                        image: activity.link!,
-                        subtitle: activity.type!,
-                        description: activity.name!,
-                        price: activity.price!,
-                      );
+                      return FeedItem(activity: activity);
                     } else if (state is ActivityLoadInProgress) {
                       return const Center(child: CircularProgressIndicator());
                     }

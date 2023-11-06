@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../blocs/activity/activity_cubit.dart';
+import '../components/feed_item.dart';
 
 const _maxHeaderHeight = 250.0;
 const _minHeaderHeight = 56.0;
@@ -103,21 +107,48 @@ class _FeedScreenState extends State<FeedScreen>
                             right: 16.0,
                             top: 16.0,
                           ),
-                          child: Material(
-                            type: MaterialType.canvas,
-                            color: Colors.white,
-                            elevation: 2.0,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(24.0),
-                              topRight: Radius.circular(24.0),
-                            ),
-                            child: ListView.builder(
-                              controller: scrollController,
-                              itemCount: 200,
-                              itemBuilder: (BuildContext context, int index) {
-                                return ListTile(title: Text('Item $index'));
-                              },
-                            ),
+                          child: BlocConsumer<ActivityCubit, ActivityState>(
+                            listener: (context, state) {
+                              debugPrint('State in listener: $state');
+                            },
+                            buildWhen: (previousState, currentState) {
+                              // To avoid fullscreen loading indicator when adding activities
+                              // to already existing feed.
+                              return !(previousState is ActivityLoadSuccess &&
+                                  currentState is ActivityLoadInProgress);
+                            },
+                            builder: (context, state) {
+                              if (state is ActivityLoadSuccess) {
+                                final activities = state.activities;
+                                return ListView.separated(
+                                  controller: scrollController,
+                                  itemCount: activities.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    debugPrint('State in builder: $state');
+                                    final activity = activities[index];
+                                    if (index == activities.length - 1) {
+                                      // When the user reaches the end of the list, fetch the next page.
+                                      BlocProvider.of<ActivityCubit>(context)
+                                          .fetchMore();
+                                    }
+                                    return FeedItem(
+                                      key: ValueKey(activity.key),
+                                      activity: activity,
+                                    );
+                                  },
+                                  separatorBuilder: (_, __) {
+                                    return const SizedBox(height: 20.0);
+                                  },
+                                );
+                              } else {
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.orange,
+                                  ),
+                                );
+                              }
+                            },
                           ),
                         ),
                       ],
