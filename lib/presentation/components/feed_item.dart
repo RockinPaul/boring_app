@@ -77,22 +77,32 @@ class FeedItem extends StatelessWidget {
                         const SizedBox(height: 3.0),
                         Text(
                           activity.name ?? 'Description unavailable',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
                   Flexible(
-                    child: Text(
-                      '${activity.price ?? 'Price unknown'}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Icon(
+                          Icons.euro_symbol,
+                        ),
+                        Text(
+                          '${activity.price!.round() * 10}/10',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
