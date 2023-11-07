@@ -1,3 +1,4 @@
+import 'package:boring_app/presentation/components/price_indicator.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/models/activity.dart';
@@ -89,15 +90,16 @@ class FeedItem extends StatelessWidget {
                   ),
                   Flexible(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.euro_symbol,
-                        ),
+                        PriceIndicator(price: activity.price ?? 0.0),
+                        const SizedBox(height: 3.0),
                         Text(
-                          '${activity.price!.round() * 10}/10',
+                          activity.price!.round() == 0
+                              ? 'Free!'
+                              : '${activity.price!.round() * 10}/10',
                           style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
                                     color: Colors.orange,
                                     fontWeight: FontWeight.w800,
                                   ),

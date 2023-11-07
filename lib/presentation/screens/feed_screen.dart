@@ -1,3 +1,4 @@
+import 'package:boring_app/presentation/components/filter_strip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -50,12 +51,26 @@ class _FeedScreenState extends State<FeedScreen>
                   child: SizedBox(
                     height: _maxHeaderHeight,
                     child: Container(
+                      height: 80.0,
                       decoration: const BoxDecoration(
                         color: Colors.orange,
                         borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(30.0),
                           bottomRight: Radius.circular(30.0),
                         ),
+                      ),
+                      child: Column(
+                        children: [
+                          const Flexible(child: FilterStrip()),
+                          Flexible(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                debugPrint('Received click');
+                              },
+                              child: const Text('Show all filters'),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
