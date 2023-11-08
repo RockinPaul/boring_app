@@ -13,15 +13,11 @@ class FeedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.canvas,
-      color: Colors.white,
-      elevation: 1.0,
-      borderRadius: BorderRadius.circular(15.0),
-      borderOnForeground: false,
-      clipBehavior: Clip.hardEdge,
-      child: SizedBox(
-        height: 230,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      height: 230,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
