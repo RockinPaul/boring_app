@@ -7,6 +7,7 @@ class FilterStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [

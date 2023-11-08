@@ -43,7 +43,6 @@ class _FeedScreenState extends State<FeedScreen> {
                   sliver: SliverAppBar(
                     backgroundColor: Colors.orange,
                     floating: true,
-                    snap: true,
                     expandedHeight: 210.0,
                     elevation: 0.0,
                     bottom: const PreferredSize(
@@ -158,7 +157,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                     height: 40,
                                     decoration: const BoxDecoration(
                                       color: Colors.orange,
-                                      borderRadius: const BorderRadius.only(
+                                      borderRadius: BorderRadius.only(
                                         bottomLeft: Radius.circular(20),
                                         bottomRight: Radius.circular(20),
                                       ),
