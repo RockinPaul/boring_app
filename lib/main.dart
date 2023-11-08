@@ -1,4 +1,4 @@
-import 'package:boring_app/presentation/screens/feed_screen.dart';
+import 'package:boring_app/presentation/screens/feed_screen_old.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/activity/activity_cubit.dart';
