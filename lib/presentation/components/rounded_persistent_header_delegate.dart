@@ -13,7 +13,7 @@ class RoundedPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
       clipBehavior: Clip.antiAlias,
       clipper: RoundedHeaderClipper(),
       child: Container(
-        color: Colors.orange, // Background color of the header
+        color: Colors.orange.shade700, // Background color of the header
         child: const Center(
           child: Text(
             'Rounded Header',

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:boring_app/data/api_service.dart';
 import 'package:boring_app/data/local_storage_service.dart';
 import '../data/models/activity.dart';

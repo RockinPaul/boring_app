@@ -37,7 +37,7 @@ class _FeedScreenState extends State<FeedScreen>
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(0.0),
         child: AppBar(
-          backgroundColor: Colors.orange,
+          backgroundColor: Colors.orange.shade700,
           elevation: 0.0,
         ),
       ),
@@ -54,9 +54,9 @@ class _FeedScreenState extends State<FeedScreen>
                       top: 30.0,
                       bottom: 30.0,
                     ),
-                    decoration: const BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.only(
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade700,
+                      borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(30.0),
                         bottomRight: Radius.circular(30.0),
                       ),
@@ -146,9 +146,9 @@ class _FeedScreenState extends State<FeedScreen>
                                   },
                                 );
                               } else {
-                                return const Center(
+                                return Center(
                                   child: CircularProgressIndicator(
-                                    color: Colors.orange,
+                                    color: Colors.orange.shade700,
                                   ),
                                 );
                               }
@@ -172,7 +172,7 @@ class _FeedScreenState extends State<FeedScreen>
                   // Default height of appbar is 56.0. We can also
                   // use a custom widget and height if needed.
                   return AppBar(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.orange.shade700,
                     title: Row(
                       children: [
                         Column(

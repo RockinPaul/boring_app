@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../data/models/activity.dart';
+
 part 'activity_state.dart';
 
 class ActivityCubit extends Cubit<ActivityState> {
   final ActivityRepository repository;
+
   ActivityCubit({required this.repository}) : super(const ActivityInitial());
 
   Future<void> appStarted() async {
@@ -14,11 +16,12 @@ class ActivityCubit extends Cubit<ActivityState> {
       final totalActivitiesAvailable = repository.activities.length;
       emit(ActivityLoadInProgress(repository.currentPage));
       final fetchedActivities = await fetchData();
-      emit( ActivityLoadSuccess(fetchedActivities));
+      emit(ActivityLoadSuccess(fetchedActivities));
     } catch (error) {
       emit(ActivityLoadFailure(error.toString()));
     }
   }
+
   // Method to fetch activities and update the state.
   Future<List<Activity>> fetchData() {
     return repository.fetchNextPage();
@@ -26,5 +29,16 @@ class ActivityCubit extends Cubit<ActivityState> {
 
   void fetchMore() {
     appStarted();
+  }
+
+  void showDetails({required Activity activity}) {
+    emit(ActivitySelectInProgress(activity));
+    try {
+      emit(ActivitySelectSuccess(activity));
+    } catch (error) {
+      final errorDescription =
+          'Unable to select an activity: ${error.toString()}';
+      emit(ActivitySelectFailure(errorDescription));
+    }
   }
 }

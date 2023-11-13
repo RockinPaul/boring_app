@@ -6,12 +6,16 @@ sealed class ActivityState extends Equatable {
 
 final class ActivityInitial extends ActivityState {
   const ActivityInitial();
+
   @override
   List<Object?> get props => [];
 }
 
+/// Handling activities feed presentation
+///
 final class ActivityLoadInProgress extends ActivityState {
   final int page;
+
   const ActivityLoadInProgress(this.page);
 
   @override
@@ -33,6 +37,34 @@ final class ActivityLoadFailure extends ActivityState {
   const ActivityLoadFailure(this.error);
 
   @override
-  // TODO: implement props
+  List<Object?> get props => [error];
+}
+
+/// Select activity to show details.
+///
+final class ActivitySelectInProgress extends ActivityState {
+  final Activity activityToShow;
+
+  const ActivitySelectInProgress(this.activityToShow);
+
+  @override
+  List<Object?> get props => [activityToShow];
+}
+
+final class ActivitySelectSuccess extends ActivityState {
+  final Activity selectedActivity;
+
+  const ActivitySelectSuccess(this.selectedActivity);
+
+  @override
+  List<Object?> get props => [selectedActivity];
+}
+
+final class ActivitySelectFailure extends ActivityState {
+  final String error;
+
+  const ActivitySelectFailure(this.error);
+
+  @override
   List<Object?> get props => [error];
 }

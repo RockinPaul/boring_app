@@ -1,4 +1,5 @@
 import 'package:boring_app/presentation/components/filter_strip.dart';
+import 'package:boring_app/presentation/screens/details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,12 +23,25 @@ class _FeedScreenState extends State<FeedScreen> {
       body: BlocConsumer<ActivityCubit, ActivityState>(
         listener: (context, state) {
           debugPrint('State in listener: $state');
+          if (state is ActivitySelectSuccess) {
+            final activityToShow = state.selectedActivity;
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) => DetailsScreen(
+                  activity: activityToShow
+                ),
+              ),
+            );
+          }
         },
         buildWhen: (previousState, currentState) {
           // To avoid fullscreen loading indicator when adding activities
-          // to already existing feed.
+          // to already existing feed. Also, to avoid unnecessary rebuilds in general.
           return !(previousState is ActivityLoadSuccess &&
-              currentState is ActivityLoadInProgress);
+                  currentState is ActivityLoadInProgress) &&
+              currentState is! ActivitySelectInProgress &&
+              currentState is! ActivitySelectSuccess &&
+              currentState is! ActivitySelectFailure;
         },
         builder: (context, state) {
           return NestedScrollView(
@@ -41,7 +55,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   handle:
                       NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                   sliver: SliverAppBar(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.orange.shade700,
                     floating: true,
                     expandedHeight: 210.0,
                     elevation: 0.0,
@@ -112,7 +126,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                       .textTheme
                                       .titleMedium
                                       ?.copyWith(
-                                        color: Colors.orange,
+                                        color: Colors.orange.shade700,
                                         fontWeight: FontWeight.bold,
                                       ),
                                 ),
@@ -155,9 +169,9 @@ class _FeedScreenState extends State<FeedScreen> {
                                   right: 0,
                                   child: Container(
                                     height: 40,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.orange,
-                                      borderRadius: BorderRadius.only(
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.shade700,
+                                      borderRadius: const BorderRadius.only(
                                         bottomLeft: Radius.circular(20),
                                         bottomRight: Radius.circular(20),
                                       ),
