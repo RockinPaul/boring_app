@@ -15,12 +15,14 @@ Future<void> init() async {
       localDataSource: sl(),
     ),
   );
+
   sl.registerLazySingleton<ApiService>(
     () => ApiService(
       baseUrl: baseUrl,
       client: sl(),
     ),
   );
+
   sl.registerLazySingleton<LocalStorageService>(
     () => LocalStorageService(),
   );

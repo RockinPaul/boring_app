@@ -11,24 +11,15 @@ class ActivityCubit extends Cubit<ActivityState> {
 
   ActivityCubit({required this.repository}) : super(const ActivityInitial());
 
-  Future<void> appStarted() async {
+  // Method to fetch activities and update the state.
+  Future<void> fetchActivities() async {
     try {
-      final totalActivitiesAvailable = repository.activities.length;
       emit(ActivityLoadInProgress(repository.currentPage));
-      final fetchedActivities = await fetchData();
+      final fetchedActivities = await repository.fetchNextPage();
       emit(ActivityLoadSuccess(fetchedActivities));
     } catch (error) {
       emit(ActivityLoadFailure(error.toString()));
     }
-  }
-
-  // Method to fetch activities and update the state.
-  Future<List<Activity>> fetchData() {
-    return repository.fetchNextPage();
-  }
-
-  void fetchMore() {
-    appStarted();
   }
 
   void showDetails({required Activity activity}) {

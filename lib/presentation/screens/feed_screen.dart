@@ -1,16 +1,15 @@
+import 'package:boring_app/blocs/filter/filter_cubit.dart';
+import 'package:boring_app/presentation/components/filter_item.dart';
 import 'package:boring_app/presentation/components/filter_strip.dart';
+import 'package:boring_app/presentation/components/shimmer.dart';
+import 'package:boring_app/presentation/screens/details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/activity/activity_cubit.dart';
+import '../../data/models/activity.dart';
+import '../components/all_filters_button.dart';
 import '../components/feed_item.dart';
-
-const _maxHeaderHeight = 210.0;
-const _minHeaderHeight = 56.0;
-const _bodyContentRatioMin = .8;
-const _bodyContentRatioMax = 1.0;
-// Must be between min and max values of body content ratio.
-const _bodyContentRatioParallax = .9;
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -19,166 +18,87 @@ class FeedScreen extends StatefulWidget {
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
-class _FeedScreenState extends State<FeedScreen>
-    with SingleTickerProviderStateMixin {
-  final ValueNotifier<double> headerNegativeOffset = ValueNotifier<double>(0);
-  final ValueNotifier<bool> appbarShadow = ValueNotifier<bool>(false);
+class _FeedScreenState extends State<FeedScreen> {
+  var _activities = <Activity>[];
+
+  /// _isLoading flag to avoid extra requests on scroll.
+  var _isLoading = false;
 
   @override
-  void dispose() {
-    headerNegativeOffset.dispose();
-    appbarShadow.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FilterCubit>().updateType(ActivityType.all);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(0.0),
-        child: AppBar(
-          backgroundColor: Colors.orange.shade700,
-          elevation: 0.0,
-        ),
-      ),
-      body: Stack(
-        children: [
-          ValueListenableBuilder<double>(
-              valueListenable: headerNegativeOffset,
-              builder: (context, offset, child) {
-                return Transform.translate(
-                  offset: Offset(0, offset * -1),
-                  child: Container(
-                    height: _maxHeaderHeight,
-                    padding: const EdgeInsets.only(
-                      top: 30.0,
-                      bottom: 30.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade700,
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(30.0),
-                        bottomRight: Radius.circular(30.0),
-                      ),
-                    ),
-                    child: const FilterStrip(),
-                  ),
-                );
-              }),
-          NotificationListener<DraggableScrollableNotification>(
-            onNotification: (notification) {
-              if (notification.extent == _bodyContentRatioMin) {
-                appbarShadow.value = false;
-                headerNegativeOffset.value = 0;
-              } else if (notification.extent == _bodyContentRatioMax) {
-                appbarShadow.value = true;
-                headerNegativeOffset.value =
-                    _maxHeaderHeight - _minHeaderHeight;
-              } else {
-                double newValue = (_maxHeaderHeight - _minHeaderHeight) -
-                    ((_maxHeaderHeight - _minHeaderHeight) *
-                        ((_bodyContentRatioParallax - (notification.extent)) /
-                            (_bodyContentRatioMax -
-                                _bodyContentRatioParallax)));
-                appbarShadow.value = false;
-                if (newValue >= _maxHeaderHeight - _minHeaderHeight) {
-                  appbarShadow.value = true;
-                  newValue = _maxHeaderHeight - _minHeaderHeight;
-                } else if (newValue < 0) {
-                  appbarShadow.value = false;
-                  newValue = 0;
-                }
-                headerNegativeOffset.value = newValue;
-              }
-              return true;
-            },
-            child: Stack(
-              children: <Widget>[
-                DraggableScrollableSheet(
-                  initialChildSize: _bodyContentRatioMin,
-                  minChildSize: _bodyContentRatioMin,
-                  maxChildSize: _bodyContentRatioMax,
-                  builder: (
-                    BuildContext context,
-                    ScrollController scrollController,
-                  ) {
-                    return Stack(
-                      children: <Widget>[
-                        Container(
-                          alignment: AlignmentDirectional.center,
-                          padding: const EdgeInsets.only(
-                            left: 18.0,
-                            right: 18.0,
-                            top: 32.0,
-                          ),
-                          child: BlocConsumer<ActivityCubit, ActivityState>(
-                            listener: (context, state) {
-                              debugPrint('State in listener: $state');
-                            },
-                            buildWhen: (previousState, currentState) {
-                              // To avoid fullscreen loading indicator when adding activities
-                              // to already existing feed.
-                              return !(previousState is ActivityLoadSuccess &&
-                                  currentState is ActivityLoadInProgress);
-                            },
-                            builder: (context, state) {
-                              if (state is ActivityLoadSuccess) {
-                                final activities = state.activities;
-                                return ListView.separated(
-                                  controller: scrollController,
-                                  itemCount: activities.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    debugPrint('State in builder: $state');
-                                    final activity = activities[index];
-                                    if (index == activities.length - 1) {
-                                      // When the user reaches the end of the list, fetch the next page.
-                                      BlocProvider.of<ActivityCubit>(context)
-                                          .fetchMore();
-                                    }
-                                    return FeedItem(
-                                      key: ValueKey(activity.key),
-                                      activity: activity,
-                                    );
-                                  },
-                                  separatorBuilder: (_, __) {
-                                    return const SizedBox(height: 20.0);
-                                  },
-                                );
-                              } else {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.orange.shade700,
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            left: 0.0,
-            right: 0.0,
-            top: 0.0,
-            child: ValueListenableBuilder<bool>(
-                valueListenable: appbarShadow,
-                builder: (context, value, child) {
-                  // Default height of appbar is 56.0. We can also
-                  // use a custom widget and height if needed.
-                  return AppBar(
+      body: BlocConsumer<ActivityCubit, ActivityState>(
+        listener: (context, state) {
+          debugPrint('State in listener: $state');
+          if (state is ActivitySelectSuccess) {
+            final activityToShow = state.selectedActivity;
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    DetailsScreen(activity: activityToShow),
+              ),
+            );
+          }
+        },
+        buildWhen: (previousState, currentState) {
+          debugPrint('Activity previousState: $previousState');
+          debugPrint('Activity currentState: $currentState');
+
+          // To avoid fullscreen loading indicator when adding activities
+          // to already existing feed. Also, to avoid unnecessary rebuilds in general.
+          if (currentState is ActivityLoadInProgress) {
+            return currentState.page == 0;
+          } else {
+            _isLoading = false;
+          }
+
+          return !(previousState is ActivityLoadSuccess &&
+                  currentState is ActivityLoadInProgress) &&
+              currentState is! ActivitySelectInProgress &&
+              currentState is! ActivitySelectSuccess &&
+              currentState is! ActivitySelectFailure;
+        },
+        builder: (context, state) {
+          return NestedScrollView(
+            // Setting floatHeaderSlivers to true is required in order to float
+            // the outer slivers over the inner scroll
+            floatHeaderSlivers: true,
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverOverlapAbsorber(
+                  handle:
+                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: SliverAppBar(
                     backgroundColor: Colors.orange.shade700,
-                    title: Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
+                    floating: true,
+                    expandedHeight: 210.0,
+                    elevation: 0.0,
+                    bottom: const PreferredSize(
+                      preferredSize: Size.fromHeight(0.0),
+                      child: SizedBox.shrink(),
+                    ),
+                    flexibleSpace: FlexibleSpaceBar(
+                      expandedTitleScale: 1.0,
+                      collapseMode: CollapseMode.pin,
+                      background: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            height: 56,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16.0),
+                            child: Text(
                               "Local activities",
                               style: Theme.of(context)
                                   .textTheme
@@ -188,7 +108,10 @@ class _FeedScreenState extends State<FeedScreen>
                                     color: Colors.white,
                                   ),
                             ),
-                            Text(
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16.0),
+                            child: Text(
                               "What To Do?",
                               style: Theme.of(context)
                                   .textTheme
@@ -198,15 +121,105 @@ class _FeedScreenState extends State<FeedScreen>
                                     color: Colors.white,
                                   ),
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          const SizedBox(height: 16.0),
+                          const Flexible(child: FilterStrip()),
+                          const Flexible(
+                            child: AllFiltersButton(),
+                          ),
+                        ],
+                      ),
                     ),
-                    elevation: value ? 2.0 : 0.0,
-                  );
-                }),
-          ),
-        ],
+                  ),
+                ),
+              ];
+            },
+            body: Builder(
+              builder: (context) {
+                return CustomScrollView(
+                  key: const PageStorageKey<String>('feed_key'),
+                  slivers: [
+                    SliverOverlapInjector(
+                      // This is the flip side of the SliverOverlapAbsorber
+                      // above.
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                          context),
+                    ),
+                    if (state is ActivityLoadSuccess)
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                          _activities = state.activities;
+
+                          if (index == _activities.length - 1 && !_isLoading) {
+                            // When the user reaches the end of the list, fetch the next page.
+                            _isLoading = true;
+                            context.read<ActivityCubit>().fetchActivities();
+                          }
+
+                          if (index == 0) {
+                            return Stack(
+                              children: [
+                                Positioned(
+                                  top: -10,
+                                  left: 0,
+                                  right: 0,
+                                  child: Container(
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.shade700,
+                                      borderRadius: const BorderRadius.only(
+                                        bottomLeft: Radius.circular(20),
+                                        bottomRight: Radius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                FeedItem(activity: _activities[index]),
+                              ],
+                            );
+                          } else if (index > _activities.length - 1) {
+                            return const Shimmer(
+                              linearGradient: shimmerGradient,
+                              child: SizedBox(
+                                height: 230,
+                                child: ShimmerLoading(
+                                  isLoading: true,
+                                  child: FeedShimmerItem(),
+                                ),
+                              ),
+                            );
+                          } else {
+                            return FeedItem(activity: _activities[index]);
+                          }
+                        }),
+                      ),
+                    if (state is ActivityLoadInProgress)
+                      const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: FeedProgressIndicator(),
+                      ),
+                  ],
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class FeedProgressIndicator extends StatelessWidget {
+  const FeedProgressIndicator({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: CircularProgressIndicator(
+        color: Colors.orange.shade700,
       ),
     );
   }

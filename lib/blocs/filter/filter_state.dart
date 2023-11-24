@@ -10,8 +10,20 @@ class FilterInitial extends FilterState {
 }
 
 class FilterApplyInProgress extends FilterState {
+  final Filter filter;
+
+  const FilterApplyInProgress(this.filter);
   @override
-  List<Object> get props => [];
+  List<Object> get props => [filter];
+}
+
+class FilterTypeApplySuccess extends FilterState {
+  final ActivityType type;
+
+  const FilterTypeApplySuccess(this.type);
+
+  @override
+  List<Object> get props => [type];
 }
 
 class FilterApplySuccess extends FilterState {
@@ -20,6 +32,8 @@ class FilterApplySuccess extends FilterState {
 }
 
 class FilterApplyFailure extends FilterState {
+  final String error;
+  const FilterApplyFailure(this.error);
   @override
-  List<Object> get props => [];
+  List<Object> get props => [error];
 }

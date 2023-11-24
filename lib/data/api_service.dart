@@ -13,11 +13,26 @@ class ApiService {
     required this.client,
   });
 
-  Future<List<Activity>> fetchRandomActivities(int numberOfEvents) async {
+  Future<List<Activity>> fetchRandomActivities(
+    int numberOfEvents, {
+    String? type,
+    int? participants,
+    double? price,
+  }) async {
     final List<Activity> events = [];
+    final List<String> filters = [];
+
+    final plainActivityUrl = '$baseUrl/activity';
+
+    if (type != null) filters.add('?type=$type');
+    if (participants != null) filters.add('?participants=$participants');
+    if (price != null) filters.add('?price=$price');
+
+    final queryString = filters.join('&');
+    final url = '$plainActivityUrl$queryString';
 
     for (int i = 0; i < numberOfEvents; i++) {
-      final response = await http.get(Uri.parse('$baseUrl/activity'));
+      final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         // final data = json.decode(response.body);
         final activity = activityFromJson(response.body);
@@ -36,7 +51,8 @@ class ApiService {
         debugPrint('-----------------------');
       }
     } else {
-      debugPrint('Failed to fetch any random activities, or no activities were found.');
+      debugPrint(
+          'Failed to fetch any random activities, or no activities were found.');
     }
     return events;
   }
