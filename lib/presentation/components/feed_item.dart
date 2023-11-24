@@ -1,3 +1,4 @@
+import 'package:boring_app/extensions.dart';
 import 'package:boring_app/presentation/components/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -53,7 +54,7 @@ class FeedItem extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            activity.type ?? 'Unknown activity type',
+                            activity.type?.capitalizeActivityType() ?? 'Unknown activity type',
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium

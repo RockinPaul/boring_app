@@ -70,6 +70,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
                         });
                       },
                       items: [
+                        'all',
                         'recreational',
                         'educational',
                         'social',
