@@ -12,7 +12,8 @@ class FilterInitial extends FilterState {
 class FilterApplyInProgress extends FilterState {
   final Filter filter;
 
-  const FilterApplyInProgress(this.filter);
+  const FilterApplyInProgress({required this.filter});
+
   @override
   List<Object> get props => [filter];
 }
@@ -27,13 +28,43 @@ class FilterTypeApplySuccess extends FilterState {
 }
 
 class FilterApplySuccess extends FilterState {
+  final Filter filter;
+  const FilterApplySuccess(this.filter);
+
   @override
-  List<Object> get props => [];
+  List<Object> get props => [filter];
 }
 
 class FilterApplyFailure extends FilterState {
   final String error;
+
   const FilterApplyFailure(this.error);
+
   @override
   List<Object> get props => [error];
+}
+
+class FilterRetrieveInProgress extends FilterState {
+  const FilterRetrieveInProgress();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class FilterRetrieveSuccess extends FilterState {
+  final Filter filter;
+
+  const FilterRetrieveSuccess(this.filter);
+
+  @override
+  List<Object?> get props => [filter];
+}
+
+class FilterRetrieveFailure extends FilterState {
+  final String error;
+
+  const FilterRetrieveFailure(this.error);
+
+  @override
+  List<Object?> get props => [error];
 }

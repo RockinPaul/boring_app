@@ -1,6 +1,8 @@
 import 'package:boring_app/data/api_service.dart';
 import 'package:boring_app/data/local_storage_service.dart';
+import 'package:flutter/foundation.dart';
 import '../data/models/activity.dart';
+import '../data/models/filter.dart';
 
 const _eventsPerPage = 10;
 
@@ -32,25 +34,53 @@ class ActivityRepository {
     return _activities;
   }
 
-  void updateFilter({
-    String? type,
-    double? price,
-    int? participants,
-  }) async {
-    if (type != null && _activityType != type) {
-      _activityType = type != 'all' ? type : null;
+  void updateFilter({Filter? filter}) {
+    final type = filter?.type;
+    final price = filter?.price;
+    final participants = filter?.participants;
+
+    debugPrint('updateFilter: type = $type, price = $price, participants = $participants');
+
+    if (type != null && _activityType != type.name) {
+      _activityType = type.name;
     }
 
     if (price != null && _price != price) {
-      _price = price;
+      _price = price < 0.1 ? null : price;
     }
 
-    if (participants != null && _participants != _participants) {
-      _participants = participants;
+    if (participants != null && _participants != participants) {
+      _participants = participants != 0 ? participants : null;
     }
 
     _currentPage = 0;
     _activities.clear();
+  }
+
+  void updateActivityType(String type) {
+    _activityType = type;
+  }
+
+  void updatePrice(double price) {
+    _price = price;
+  }
+
+  void updateParticipants(int participants) {
+    _participants = participants;
+  }
+
+  Filter retrieveFilter() {
+    // Mapping a String value of Activity type
+    // to available enum representation in ActivityType.
+    final activityPresentationType = ActivityType.values.firstWhere(
+      (element) => element.name == _activityType!,
+    );
+    final currentFilter = Filter(
+      type: activityPresentationType,
+      price: _price,
+      participants: _participants,
+    );
+    return currentFilter;
   }
 
   List<Activity> get activities => _activities;

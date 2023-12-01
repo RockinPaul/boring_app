@@ -2,38 +2,35 @@ import 'package:flutter/material.dart';
 
 class CustomProgressBar extends StatelessWidget {
   final IconData iconData;
-  final double percentage;
+  final double progress;
   final Color fillColor;
   final Color backgroundColor;
 
   const CustomProgressBar({super.key,
     required this.iconData,
-    required this.percentage,
-    this.fillColor = Colors.blue,
+    required this.progress,
+    this.fillColor = Colors.yellow,
     this.backgroundColor = Colors.grey,
   });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
+      alignment: Alignment.center,
       children: [
         // Background icon
         Icon(
           iconData,
-          size: 35.0,
+          size: 45.0,
           color: backgroundColor,
         ),
         // Foreground icon with custom color based on percentage
-        Positioned(
-          top: 0,
-          left: 0,
-          child: ClipRect(
-            clipper: _IconClipper(percentage),
-            child: Icon(
-              iconData,
-              size: 50.0, // Set the size of your icon
-              color: fillColor,
-            ),
+        ClipRect(
+          clipper: _IconClipper(progress),
+          child: Icon(
+            iconData,
+            size: 45.0, // Set the size of your icon
+            color: fillColor,
           ),
         ),
       ],
@@ -42,14 +39,14 @@ class CustomProgressBar extends StatelessWidget {
 }
 
 class _IconClipper extends CustomClipper<Rect> {
-  final double percentage;
+  final double progress;
 
-  _IconClipper(this.percentage);
+  _IconClipper(this.progress);
 
   @override
   Rect getClip(Size size) {
     // Calculate the width based on the percentage
-    double width = size.width * (percentage / 100.0);
+    double width = size.width * progress;
 
     // Return the rectangular clip area
     return Rect.fromLTRB(0, 0, width, size.height);

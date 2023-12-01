@@ -1,30 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:boring_app/blocs/activity/activity_cubit.dart';
-import 'package:boring_app/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/filter/filter_cubit.dart';
-
-enum ActivityType {
-  all('all', Icons.search),
-  recreational('recreational', Icons.golf_course),
-  educational('educational', Icons.library_books),
-  social('social', Icons.people),
-  music('music', Icons.music_note),
-  busywork('busywork', Icons.work),
-  diy('diy', Icons.handyman),
-  charity('charity', Icons.handshake),
-  cooking('cooking', Icons.cake),
-  relaxation('relaxation', Icons.flight_takeoff);
-
-  const ActivityType(this.name, this.icon);
-
-  final String name;
-  final IconData icon;
-
-  String get capitalizedName => name.capitalizeActivityType();
-}
+import '../../data/models/filter.dart';
 
 class FilterItem extends StatelessWidget {
   final ActivityType type;
@@ -38,47 +17,24 @@ class FilterItem extends StatelessWidget {
   Widget build(BuildContext context) {
     var isSelected = false;
 
-    return BlocConsumer<FilterCubit, FilterState>(
-      listenWhen: (previousState, currentState) {
-        debugPrint(
-            'previousState for filter item in listenWhen: $previousState');
-        debugPrint('currentState for filter item in listenWhen: $currentState');
-        return true;
-      },
-      listener: (context, state) {
-        // TODO: implement listener
-        // debugPrint('Filter state: $state');
-      },
+    return BlocBuilder<FilterCubit, FilterState>(
       buildWhen: (previousState, currentState) {
-        debugPrint(
-            'previousState for filter item in buildWhen: $previousState');
-        debugPrint('currentState for filter item in buildWhen: $currentState');
+        debugPrint('previousState for FilterItem in buildWhen: $previousState');
+        debugPrint('currentState for FilterItem in buildWhen: $currentState');
 
-        /// Checking whether some filter was selected.
-        if (currentState is FilterTypeApplySuccess) {
-          final appliedType = currentState.type;
+        if (previousState is FilterInitial && type == ActivityType.all) {
+          isSelected = true;
+          return true;
+        }
 
-          /// Handling initial selection.
-          if (previousState is FilterInitial) {
-            isSelected = appliedType == type;
-            return isSelected;
-          }
+        if (currentState is FilterApplyInProgress) {
+          final selectedType = currentState.filter.type;
 
-          /// Handling change of enabled filter.
-          if (previousState is FilterTypeApplySuccess) {
-            final previousType = previousState.type;
-            /// Avoiding unnecessary rebuilds.
-            ///
-            /// for the FilterItem instances not involved in this state change
-            /// and when FilterItem is already selected.
-            if (appliedType != previousType &&
-                (appliedType == type || previousType == type)) {
-              isSelected = !isSelected && (appliedType == type);
-
-              /// Triggering feed refresh.
-              context.read<ActivityCubit>().fetchActivities();
-              return true;
-            }
+          // Whether this item must be selected/unselected and therefore rebuilt.
+          if ((selectedType == type && !isSelected) ||
+              (selectedType != type && isSelected)) {
+            isSelected = !isSelected;
+            return true;
           }
           return false;
         }
@@ -87,7 +43,9 @@ class FilterItem extends StatelessWidget {
       builder: (context, state) {
         debugPrint('Rebuilt for type: $type');
         return GestureDetector(
-          onTap: () => context.read<FilterCubit>().updateType(type),
+          onTap: () => context
+              .read<FilterCubit>()
+              .applyFilter(filter: Filter(type: type)),
           child: Container(
             width: 80.0,
             height: 80.0,

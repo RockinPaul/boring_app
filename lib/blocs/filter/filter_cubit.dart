@@ -1,10 +1,8 @@
 import 'package:boring_app/repositories/activity_repository.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../data/models/filter.dart';
-import '../../presentation/components/filter_item.dart';
 
 part 'filter_state.dart';
 
@@ -13,31 +11,43 @@ class FilterCubit extends Cubit<FilterState> {
 
   FilterCubit({required this.repository}) : super(FilterInitial());
 
-  void applyFilters({
-    required String selectedType,
-    required double selectedPrice,
-    required int selectedParticipants,
+  void applyFilter({
+    required Filter filter,
   }) {
-    // Add logic to apply filters here
-    // Typically, you would emit FilterApplyInProgress, make the API request,
-    // then emit FilterApplySuccess or FilterApplyFailure based on the result.
+    emit(FilterApplyInProgress(filter: filter));
+    final previouslySelectedType = repository.activityType;
+    final previouslySelectedPrice = repository.price;
+    final previouslySelectedParticipants = repository.participants;
+
+    repository.updateFilter(filter: filter);
+
+    // debugPrint('Previously selected type: $previouslySelectedType');
+    // debugPrint('Previously selected price: $previouslySelectedPrice');
+    // debugPrint(
+    //     'Previously selected participants: $previouslySelectedParticipants');
+    //
+    // debugPrint('Currently selected type: ${filter.type?.name}');
+    // debugPrint('Currently selected price: ${filter.price}');
+    // debugPrint('Currently selected participants: ${filter.participants}');
+
+    if (filter.type != null && repository.activityType != filter.type?.name) {
+      emit(FilterTypeApplySuccess(filter.type!));
+    }
+    emit(FilterApplySuccess(filter));
   }
 
-  void updateType(ActivityType type) async {
-    debugPrint('Activity of type selected: ${type.name}');
-    repository.updateFilter(type: type.name);
-    emit(FilterTypeApplySuccess(type));
-  }
+  void retrieveFilter() {
+    emit(const FilterRetrieveInProgress());
+    final filter = repository.retrieveFilter();
 
-  void updateAccessibility(double accessibility) {
-    emit(FilterApplySuccess());
-  }
+    final previouslySelectedType = filter.type;
+    final previouslySelectedPrice = filter.price;
+    final previouslySelectedParticipants = filter.participants;
 
-  void updatePrice(double price) {
-    emit(FilterApplySuccess());
-  }
-
-  void updateParticipants(int participants) {
-    emit(FilterApplySuccess());
+    emit(FilterRetrieveSuccess(Filter(
+      type: previouslySelectedType,
+      price: previouslySelectedPrice,
+      participants: previouslySelectedParticipants,
+    )));
   }
 }

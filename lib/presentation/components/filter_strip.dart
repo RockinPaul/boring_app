@@ -1,6 +1,8 @@
 import 'package:boring_app/presentation/components/filter_item.dart';
 import 'package:flutter/material.dart';
 
+import '../../data/models/filter.dart';
+
 class FilterStrip extends StatelessWidget {
   const FilterStrip({super.key});
 

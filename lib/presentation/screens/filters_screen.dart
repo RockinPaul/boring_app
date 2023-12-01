@@ -1,10 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:boring_app/extensions.dart';
+import 'package:boring_app/blocs/activity/activity_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/filter/filter_cubit.dart';
-import '../components/filter_item.dart';
+import '../../data/models/filter.dart';
 
 class FiltersScreen extends StatefulWidget {
   const FiltersScreen({super.key});
@@ -14,14 +14,23 @@ class FiltersScreen extends StatefulWidget {
 }
 
 class _FiltersScreenState extends State<FiltersScreen> {
-  String selectedType = 'all';
-  double selectedPrice = 0.5;
-  int selectedParticipants = 1;
+  // String _selectedType = 'all';
+  ActivityType _selectedType = ActivityType.all;
+  double _selectedPrice = 0.0;
+  int _selectedParticipants = 0;
+
+  bool _isRetrieved = false;
 
   final TextEditingController participantsController =
-      TextEditingController(text: '1');
+      TextEditingController(text: '0');
 
   // final TextEditingController filterController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<FilterCubit>().retrieveFilter();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,17 +38,53 @@ class _FiltersScreenState extends State<FiltersScreen> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back_ios_new),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: Colors.orange.shade700,
       ),
-      body: BlocBuilder<FilterCubit, FilterState>(
-        builder: (context, state) {
+      body: BlocConsumer<FilterCubit, FilterState>(
+        listener: (BuildContext context, FilterState state) {
+          debugPrint('FiltersScreen state in listener: $state');
           if (state is FilterApplySuccess) {
-            // Handle success state if needed
-          } else if (state is FilterApplyFailure) {
-            // Handle failure state if needed
+            context.read<ActivityCubit>().fetchActivities();
+            Navigator.of(context).pop();
           }
+        },
+        buildWhen: (previousState, currentState) {
+          debugPrint('FiltersScreen, buildWhen previous state: $previousState');
+          debugPrint('FiltersScreen, buildWhen current state: $currentState');
+          return true;
+        },
+        builder: (context, state) {
+          debugPrint('FiltersScreen state in builder: $state');
+
+          if (state is FilterRetrieveSuccess && !_isRetrieved) {
+            debugPrint('FilterRetrieveSuccess!');
+            final retrievedFilter = state.filter;
+            final type = retrievedFilter.type;
+            final price = retrievedFilter.price;
+            final participants = retrievedFilter.participants;
+
+            if (type != null) {
+              _selectedType = type;
+            }
+            if (price != null) {
+              _selectedPrice = price;
+            }
+            if (participants != null) {
+              _selectedParticipants = participants;
+            }
+
+            _isRetrieved = true;
+
+            debugPrint('Retrieved type: $_selectedType');
+            debugPrint('Retrieved price: $_selectedPrice');
+            debugPrint('Retrieved participants: $_selectedParticipants');
+          }
+
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -57,68 +102,50 @@ class _FiltersScreenState extends State<FiltersScreen> {
                     ),
                   ),
                   const SizedBox(height: 8.0),
-                  // Type (Category) Dropdown
 
-                  Flexible(
-                    child: DropdownButton<String>(
-                      dropdownColor: Colors.orange.shade700,
-                      value: selectedType,
-                      isExpanded: true,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedType = newValue!;
-                        });
-                      },
-                      items: [
-                        'all',
-                        'recreational',
-                        'educational',
-                        'social',
-                        'music',
-                        'busywork',
-                        'diy',
-                        'charity',
-                        'cooking',
-                        'relaxation',
-                      ]
-                          .map<DropdownMenuItem<String>>(
-                            (String value) => DropdownMenuItem<String>(
-                              value: value,
-                              child: AutoSizeText(
-                                value.capitalizeActivityType(),
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      hint: const AutoSizeText('Select Type'),
-                    ),
-                  ),
-
+                  /// Activity type dropdown menu
                   Flexible(
                     child: DropdownMenu<ActivityType>(
-                      // controller: filterController,
                       enableFilter: false,
                       requestFocusOnTap: false,
-                      leadingIcon: const Icon(Icons.search),
-                      label: const Text('Icon'),
-                      inputDecorationTheme: const InputDecorationTheme(
+                      leadingIcon: Icon(_selectedType.icon),
+                      textStyle: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(color: Colors.orange.shade700),
+                      expandedInsets: EdgeInsets.zero,
+                      inputDecorationTheme: InputDecorationTheme(
+                        border: InputBorder.none,
                         filled: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 5.0),
+                        suffixIconColor: Colors.orange.shade700,
+                        prefixIconColor: Colors.orange.shade700,
                       ),
-                      initialSelection: ActivityType.recreational,
+                      initialSelection: _selectedType,
                       onSelected: (ActivityType? activityType) {
                         if (activityType != null) {
-                          context.read<FilterCubit>().updateType(activityType);
+                          setState(() {
+                            _selectedType = activityType;
+                          });
                         }
                       },
                       dropdownMenuEntries: ActivityType.values
+                          .toList()
                           .map<DropdownMenuEntry<ActivityType>>(
                         (ActivityType filter) {
                           return DropdownMenuEntry<ActivityType>(
                             value: filter,
                             label: filter.capitalizedName,
                             leadingIcon: Icon(filter.icon),
+                            style: MenuItemButton.styleFrom(
+                              foregroundColor: filter != _selectedType
+                                  ? Colors.grey.shade700
+                                  : Colors.orange.shade700,
+                              iconColor: filter != _selectedType
+                                  ? Colors.grey.shade700
+                                  : Colors.orange.shade700,
+                            ),
                           );
                         },
                       ).toList(),
@@ -129,11 +156,12 @@ class _FiltersScreenState extends State<FiltersScreen> {
                   Flexible(
                     child: AutoSizeText(
                       'Price range',
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Colors.orange.shade700,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(
+                              color: Colors.orange.shade700,
+                              fontWeight: FontWeight.bold),
                     ),
                   ),
                   const Flexible(child: SizedBox(height: 8.0)),
@@ -146,28 +174,35 @@ class _FiltersScreenState extends State<FiltersScreen> {
                           child: AutoSizeText(
                             'Cheap',
                             textAlign: TextAlign.left,
-                            style: Theme.of(context).textTheme.labelLarge,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(color: Colors.grey.shade700),
                           ),
                         ),
                         Expanded(
                           child: AutoSizeText(
                             'Expensive',
                             textAlign: TextAlign.right,
-                            style: Theme.of(context).textTheme.labelLarge,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(color: Colors.grey.shade700),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  // Price Slider
+
+                  /// Price slider
                   Flexible(
                     child: Slider(
                       activeColor: Colors.orange.shade700,
                       inactiveColor: Colors.grey,
-                      value: selectedPrice,
+                      value: _selectedPrice,
                       onChanged: (double value) {
                         setState(() {
-                          selectedPrice = value;
+                          _selectedPrice = value;
                         });
                       },
                       min: 0.0,
@@ -176,7 +211,8 @@ class _FiltersScreenState extends State<FiltersScreen> {
                     ),
                   ),
                   const Flexible(child: SizedBox(height: 56.0)),
-                  // Number of Participants Input
+
+                  /// Number of Participants Input
                   Flexible(
                     child: AutoSizeText(
                       'Number of Participants',
@@ -190,7 +226,10 @@ class _FiltersScreenState extends State<FiltersScreen> {
                   Flexible(
                     child: AutoSizeText(
                       '(0 - for any)',
-                      style: Theme.of(context).textTheme.labelLarge,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge
+                          ?.copyWith(color: Colors.grey.shade700),
                     ),
                   ),
                   const Flexible(child: SizedBox(height: 16.0)),
@@ -212,8 +251,8 @@ class _FiltersScreenState extends State<FiltersScreen> {
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      if (selectedParticipants > 1) {
-                                        selectedParticipants--;
+                                      if (_selectedParticipants > 0) {
+                                        _selectedParticipants--;
                                       }
                                     });
                                   },
@@ -223,16 +262,17 @@ class _FiltersScreenState extends State<FiltersScreen> {
                           ),
                         ),
                         Flexible(
-                            child: AutoSizeText(
-                          selectedParticipants.toString(),
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                color: Colors.orange.shade700,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        )),
+                          child: AutoSizeText(
+                            _selectedParticipants.toString(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  color: Colors.orange.shade700,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ),
                         Flexible(
                           child: Padding(
                             padding: const EdgeInsets.only(left: 32.0),
@@ -247,7 +287,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      selectedParticipants++;
+                                      _selectedParticipants++;
                                     });
                                   },
                                 ),
@@ -274,14 +314,17 @@ class _FiltersScreenState extends State<FiltersScreen> {
           borderRadius: const BorderRadius.all(Radius.circular(10.0)),
           color: Colors.orange.shade700,
         ),
-        child: OutlinedButton(
+        child: TextButton(
           onPressed: () {
-            // Dispatch an event to the cubit to apply filters
-            context.read<FilterCubit>().applyFilters(
-                  selectedType: selectedType,
-                  selectedPrice: selectedPrice,
-                  selectedParticipants: selectedParticipants,
-                );
+            debugPrint(
+                'Filter to apply: $_selectedType, $_selectedPrice, $_selectedParticipants');
+
+            final filterToApply = Filter(
+              type: _selectedType,
+              price: _selectedPrice,
+              participants: _selectedParticipants,
+            );
+            context.read<FilterCubit>().applyFilter(filter: filterToApply);
           },
           child: AutoSizeText(
             'Apply Filters',

@@ -22,14 +22,16 @@ class ApiService {
     final List<Activity> events = [];
     final List<String> filters = [];
 
-    final plainActivityUrl = '$baseUrl/activity';
+    final plainActivityUrl = '$baseUrl/activity?';
 
-    if (type != null) filters.add('?type=$type');
-    if (participants != null) filters.add('?participants=$participants');
-    if (price != null) filters.add('?price=$price');
+    if (type != null && type != 'all') filters.add('type=$type');
+    if (participants != null) filters.add('participants=$participants');
+    if (price != null) filters.add('maxprice=$price');
 
     final queryString = filters.join('&');
     final url = '$plainActivityUrl$queryString';
+
+    debugPrint('URL to fetch from: $url');
 
     for (int i = 0; i < numberOfEvents; i++) {
       final response = await http.get(Uri.parse(url));
