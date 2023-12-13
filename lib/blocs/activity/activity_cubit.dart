@@ -1,8 +1,8 @@
-import 'package:boring_app/repositories/activity_repository.dart';
+import 'package:boring_app/data/repositories/activity_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../data/models/activity.dart';
+import '../../domain/models/activity.dart';
 
 part 'activity_state.dart';
 

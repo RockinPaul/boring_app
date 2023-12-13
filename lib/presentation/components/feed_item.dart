@@ -1,10 +1,10 @@
-import 'package:boring_app/extensions.dart';
+import 'package:boring_app/utils/extensions.dart';
 import 'package:boring_app/presentation/components/custom_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/activity/activity_cubit.dart';
-import '../../data/models/activity.dart';
+import '../../domain/models/activity.dart';
 
 class FeedItem extends StatelessWidget {
   final Activity activity;
@@ -107,9 +107,9 @@ class FeedItem extends StatelessWidget {
                             progress: activity.price ?? 0.0),
                         const SizedBox(height: 3.0),
                         Text(
-                          activity.price!.round() == 0
-                              ? 'Free!'
-                              : '${activity.price!.round() * 10}/10',
+                          activity.price?.round() != 0
+                              ? '${activity.price! * 10}/10'
+                              : 'Free!',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     color: Colors.orange.shade700,

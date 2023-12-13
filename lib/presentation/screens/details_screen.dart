@@ -1,6 +1,6 @@
 import 'package:boring_app/presentation/components/extra_info_item.dart';
 import 'package:flutter/material.dart';
-import '../../data/models/activity.dart';
+import '../../domain/models/activity.dart';
 
 class DetailsScreen extends StatelessWidget {
   final Activity activity;

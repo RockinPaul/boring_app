@@ -1,5 +1,5 @@
 
-import 'package:boring_app/extensions.dart';
+import 'package:boring_app/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
 enum ActivityType {

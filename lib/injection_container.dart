@@ -1,6 +1,5 @@
-import 'package:boring_app/data/api_service.dart';
-import 'package:boring_app/data/local_storage_service.dart';
-import 'package:boring_app/repositories/activity_repository.dart';
+import 'package:boring_app/data/data_sources/api_service.dart';
+import 'package:boring_app/data/repositories/activity_repository.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,10 +9,7 @@ final sl = GetIt.instance;
 
 Future<void> init() async {
   sl.registerLazySingleton(
-    () => ActivityRepository(
-      remoteDataSource: sl(),
-      localDataSource: sl(),
-    ),
+    () => ActivityRepository(remoteDataSource: sl()),
   );
 
   sl.registerLazySingleton<ApiService>(
@@ -23,10 +19,5 @@ Future<void> init() async {
     ),
   );
 
-  sl.registerLazySingleton<LocalStorageService>(
-    () => LocalStorageService(),
-  );
-  sl.registerLazySingleton<http.Client>(
-    () => http.Client(),
-  );
+  sl.registerLazySingleton<http.Client>(() => http.Client());
 }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/filter/filter_cubit.dart';
-import '../../data/models/filter.dart';
+import '../../domain/models/filter.dart';
 
 class FiltersScreen extends StatefulWidget {
   const FiltersScreen({super.key});

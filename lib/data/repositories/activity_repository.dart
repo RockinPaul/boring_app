@@ -1,14 +1,12 @@
-import 'package:boring_app/data/api_service.dart';
-import 'package:boring_app/data/local_storage_service.dart';
+import 'package:boring_app/data/data_sources/api_service.dart';
 import 'package:flutter/foundation.dart';
-import '../data/models/activity.dart';
-import '../data/models/filter.dart';
+import '../../domain/models/activity.dart';
+import '../../domain/models/filter.dart';
 
 const _eventsPerPage = 10;
 
 class ActivityRepository {
   final ApiService remoteDataSource;
-  final LocalStorageService localDataSource;
 
   final _activities = <Activity>[];
   var _currentPage = 0;
@@ -16,10 +14,7 @@ class ActivityRepository {
   double? _price;
   int? _participants;
 
-  ActivityRepository({
-    required this.remoteDataSource,
-    required this.localDataSource,
-  });
+  ActivityRepository({required this.remoteDataSource});
 
   Future<List<Activity>> fetchNextPage() async {
     final nextPageActivities = await remoteDataSource.fetchRandomActivities(
@@ -39,7 +34,8 @@ class ActivityRepository {
     final price = filter?.price;
     final participants = filter?.participants;
 
-    debugPrint('updateFilter: type = $type, price = $price, participants = $participants');
+    debugPrint(
+        'updateFilter: type = $type, price = $price, participants = $participants');
 
     if (type != null && _activityType != type.name) {
       _activityType = type.name;

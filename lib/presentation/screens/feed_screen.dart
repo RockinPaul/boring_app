@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/activity/activity_cubit.dart';
-import '../../data/models/activity.dart';
-import '../../data/models/filter.dart';
+import '../../domain/models/activity.dart';
+import '../../domain/models/filter.dart';
 import '../components/all_filters_button.dart';
 import '../components/feed_item.dart';
 
@@ -39,7 +39,7 @@ class _FeedScreenState extends State<FeedScreen> {
       backgroundColor: Colors.orange.shade700,
       body: BlocConsumer<ActivityCubit, ActivityState>(
         listener: (context, state) {
-          debugPrint('State in listener: $state');
+          // debugPrint('State in listener: $state');
           if (state is ActivitySelectSuccess) {
             final activityToShow = state.selectedActivity;
             Navigator.of(context).push(

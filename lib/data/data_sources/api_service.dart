@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:boring_app/data/models/activity.dart';
+import 'package:boring_app/domain/models/activity.dart';
 
 class ApiService {
   final String baseUrl;

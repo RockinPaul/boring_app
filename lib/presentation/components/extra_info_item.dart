@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../data/models/activity.dart';
+import '../../domain/models/activity.dart';
 import 'custom_progress_bar.dart';
 
 class ExtraInfoItem extends StatelessWidget {
@@ -32,36 +32,33 @@ class ExtraInfoItem extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.orange.shade700,
-        borderRadius: const BorderRadius.all(Radius.circular(30.0)),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(30.0),
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          title != 'Participants'
-              ? CustomProgressBar(
-                  iconData: icon,
-                  progress: value,
-                  fillColor: Colors.yellow.shade600,
-                  backgroundColor: Colors.grey,
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CustomProgressBar(
-                      iconData: icon,
-                      progress: value,
-                      fillColor: Colors.yellow.shade600,
-                      backgroundColor: Colors.grey,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CustomProgressBar(
+                iconData: icon,
+                progress: value,
+                fillColor: Colors.yellow.shade600,
+                backgroundColor: Colors.grey,
+              ),
+              Text(
+                value != 0.0
+                    ? '${((value * 100) % 10 == 0 ? (value * 10).toInt() : value * 10)}/10'
+                    : '',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    Text(
-                      activity.participants.toString() ?? '',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ],
-                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 4.0),
           Text(
             title,
