@@ -190,13 +190,16 @@ class _FeedScreenState extends State<FeedScreen> {
                                 ),
                               );
                             } else if (index > _activities.length - 1) {
-                              return const Shimmer(
-                                linearGradient: shimmerGradient,
-                                child: SizedBox(
-                                  height: 230,
-                                  child: ShimmerLoading(
-                                    isLoading: true,
-                                    child: FeedShimmerItem(),
+                              return const ColoredBox(
+                                color: Colors.white,
+                                child: Shimmer(
+                                  linearGradient: shimmerGradient,
+                                  child: SizedBox(
+                                    height: 230,
+                                    child: ShimmerLoading(
+                                      isLoading: true,
+                                      child: FeedShimmerItem(),
+                                    ),
                                   ),
                                 ),
                               );

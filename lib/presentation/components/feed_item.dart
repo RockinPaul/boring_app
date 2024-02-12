@@ -103,8 +103,9 @@ class FeedItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         CustomProgressBar(
-                            iconData: Icons.euro,
-                            progress: activity.price ?? 0.0),
+                          iconData: Icons.euro,
+                          progress: activity.price ?? 0.0,
+                        ),
                         const SizedBox(height: 3.0),
                         Text(
                           activity.price?.round() != 0
